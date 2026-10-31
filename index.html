@@ -363,16 +363,25 @@ const SEED = {
   dives: []
 };
 
+const DEFAULT_LINKS = {
+  'dnd-action-sheet-generator': 'https://github.com/Ertreuer/DnD-5e-Action-Sheet',
+  'dnd-spell-sheet-generator': 'https://github.com/Ertreuer/DnD-5e-Spell-Sheet'
+};
+
 async function loadData() {
   try {
     const r = await window.storage.get('ertreuer:data');
     if (r) DATA = JSON.parse(r.value);
-    else { DATA = SEED; await saveData(); }
+    else DATA = JSON.parse(JSON.stringify(SEED));
   } catch(e) {
     // First run: no saved data yet, start with the two DnD projects
     DATA = JSON.parse(JSON.stringify(SEED));
-    await saveData();
   }
+  // Make sure the two DnD projects point to their GitHub repos
+  DATA.projects.forEach(p => {
+    if (DEFAULT_LINKS[p.id] && !p.link) p.link = DEFAULT_LINKS[p.id];
+  });
+  await saveData();
 }
 
 async function saveData() {
